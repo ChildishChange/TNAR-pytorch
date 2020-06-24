@@ -26,8 +26,8 @@ parser.add_argument('--latent-dim', type=int, default=512)
 #parser.add_argument('--kld-coef', type=float, default=0.5)
 parser.add_argument('--cuda',type=bool,default=False)
 parser.add_argument('--datadir', type=str, default='./TNAR/seed123/')
-parser.add_argument('--logdir', type=str, default='./logs/vae_aug')
-parser.add_argument('--resultdir', type=str, default='./result/vae_aug')
+parser.add_argument('--logdir', type=str, default='./logs/vae')
+parser.add_argument('--resultdir', type=str, default='./result/vae')
 
 args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
@@ -42,7 +42,7 @@ torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 
 
-kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+# kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 
 # load dataset
 unlabeled_train_set = np.load(args.datadir+'/unlabeled_train.npz')
@@ -75,7 +75,8 @@ if __name__ == "__main__":
     model = VAE(args.latent_dim).to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     for e in range(1, args.epoch + 1):
-        train(model=model,train_loader=X_ul_loader,optimizer=optimizer,device = device,epoch=e)
+        train(model=model,train_loader=X_ul_loader,optimizer=optimizer,device = device,epoch=e)    
+        if e%10 == 0: torch.save(model.cpu().state_dict(), args.logdir+'/model-'+e+'.pkl')
         with torch.no_grad():
             sample = torch.randn(64, args.latent_dim).to(device)
             sample = model.decode(sample).cpu()
