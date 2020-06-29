@@ -8,3 +8,4 @@
     1. a.detach()，使用了a.detach()进行计算的，将会把 a.detach()视为一个常量，不计算 包括 a 与之前所有路径的梯度
     2. torch.autograd() 可以计算任意节点之间的梯度，计算完成后会销毁计算图，使用 retain_graph=True 即可多次求导，被求导节点的 grad 信息不会改变，梯度不会叠加；使用 节点.backward(retain_graph=True) 求导则会叠加梯度
     3. 当需要计算多阶导时，使用 create_graph=True 参数，将新的节点加入计算图后再次计算，这一操作同时会保存之前的计算图
+8. 运行时出现了显存持续增长的现象，原因是 normalization 函数，传入参数不能是 requires_grad = True 的张量

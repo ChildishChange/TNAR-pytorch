@@ -14,16 +14,16 @@ class VAE(nn.Module):
         # 3,32,32/128,15,15/256,6,6
         super(VAE, self).__init__()
         # encode
-        self.conv1 = nn.Sequential(nn.Conv2d(3,128,kernel_size=4,stride=2),nn.ReLU(inplace=True),)
-        self.conv2 = nn.Sequential(nn.Conv2d(128,256,kernel_size=5,stride=2),nn.ReLU(inplace=True),)
-        self.conv3 = nn.Sequential(nn.Conv2d(256,512,kernel_size=3,stride=1),nn.ReLU(inplace=True),)
+        self.conv1 = nn.Sequential(nn.Conv2d(3,128,kernel_size=4,stride=2),nn.BatchNorm2d(128),nn.LeakyReLU(0.1,True),)
+        self.conv2 = nn.Sequential(nn.Conv2d(128,256,kernel_size=5,stride=2),nn.BatchNorm2d(256),nn.LeakyReLU(0.1,True),)
+        self.conv3 = nn.Sequential(nn.Conv2d(256,512,kernel_size=3,stride=1),nn.BatchNorm2d(512),nn.LeakyReLU(0.1,True),)
         self.fc11 = nn.Linear(4*4*512, latent_dim)
         self.fc12 = nn.Linear(4*4*512, latent_dim)
         # decode
-        self.fc2 = nn.Sequential(nn.Linear(latent_dim,4*4*512),nn.ReLU(inplace=True))
-        self.conv1t = nn.Sequential(nn.ConvTranspose2d(512,256,kernel_size=3,stride=1),nn.ReLU(inplace=True),)
-        self.conv2t = nn.Sequential(nn.ConvTranspose2d(256,128,kernel_size=5,stride=2),nn.ReLU(inplace=True),)
-        self.conv3t = nn.Sequential(nn.ConvTranspose2d(128,3,kernel_size=4,stride=2))    
+        self.fc2 = nn.Sequential(nn.Linear(latent_dim,4*4*512),nn.LeakyReLU(0.1,True))
+        self.conv1t = nn.Sequential(nn.ConvTranspose2d(512,256,kernel_size=3,stride=1),nn.BatchNorm2d(256),nn.LeakyReLU(0.1,True),)
+        self.conv2t = nn.Sequential(nn.ConvTranspose2d(256,128,kernel_size=5,stride=2),nn.BatchNorm2d(128),nn.LeakyReLU(0.1,True),)
+        self.conv3t = nn.Sequential(nn.ConvTranspose2d(128,3,kernel_size=4,stride=2),nn.BatchNorm2d(3))    
 
     def encode(self, x):
         x = self.conv1(x)
@@ -58,4 +58,4 @@ def loss_function(recon_x, x, mu, logvar):
     # https://arxiv.org/abs/1312.6114
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    return BCE + KLD
+    return BCE, KLD

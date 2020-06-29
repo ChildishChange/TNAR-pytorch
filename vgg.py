@@ -58,7 +58,7 @@ def make_layers(cfg, batch_norm=False):
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
             if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
+                layers += [conv2d, nn.BatchNorm2d(v), nn.LeakyReLU(0.1,True)]
             else:
                 layers += [conv2d, nn.ReLU(inplace=True)]
             in_channels = v
